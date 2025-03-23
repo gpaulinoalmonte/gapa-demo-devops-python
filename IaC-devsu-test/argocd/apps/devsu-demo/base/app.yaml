@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: devsu-demo
+  namespace: argocd
+spec:
+  destination:
+    server: "https://api.crc.testing:6443"
+    namespace: devsu-demo
+  source:
+    path: pre-produccion/namespaces/devsu-demo/overlays/test
+    repoURL: "https://dev.azure.com/georgexdxd5/devsu-demo/_git/IaC-devsu-test"
+    targetRevision: main
+  project: default
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false
+  # ignoreDifferences:
+  # - kind: Serviceaccount
+  #   jsonPointers:
+  #   - /imagePullSecrets

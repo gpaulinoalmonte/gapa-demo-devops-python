@@ -1,0 +1,12 @@
+[
+    {
+        "op": "replace",
+        "path": "/spec/template/spec/serviceAccountName",
+        "value": "devsu-demo-sa"
+    },
+    {
+        "op": "replace",
+        "path": "/spec/template/spec/serviceAccount",
+        "value": "devsu-demo-sa"
+    }
+]

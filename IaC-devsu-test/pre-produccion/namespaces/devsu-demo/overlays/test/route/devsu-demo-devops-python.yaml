@@ -1,0 +1,15 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  namespace: devsu-demo
+  labels:
+    app: devsu-demo-devops-python
+  name: devsu-demo-devops-python
+spec:
+  host: devsu-demo-devops-python.apps-crc.testing
+  port:
+    targetPort: 8000
+  to:
+    kind: Service
+    name: devsu-demo-devops-python
+    weight: 100

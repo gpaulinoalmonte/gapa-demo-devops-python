@@ -1,0 +1,11 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: devsu-demo
+  labels:
+    kubernetes.io/metadata.name: devsu-demo
+  annotations:
+    openshift.io/description: Proyecto dedicado para devsu-demo
+    openshift.io/display-name: devsu-demo
+  finalizers:
+    - kubernetes

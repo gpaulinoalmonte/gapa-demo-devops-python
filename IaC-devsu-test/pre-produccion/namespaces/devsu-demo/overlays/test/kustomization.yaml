@@ -1,0 +1,18 @@
+kind: Kustomization
+apiVersion: kustomize.config.k8s.io/v1beta1
+namespace: devsu-demo
+
+resources:
+    - sa/account.yml
+    - sa/devsu-demo-sa.yml
+    - route/devsu-demo-devops-python.yaml
+    - tools
+
+secretGenerator:
+    - name: secret-devsu-demo-devops-python
+      literals:
+          - PORT=8000
+          - DATABASE_NAME=/app/data/dev.sqlite
+          - DATABASE_USER=user
+          - DATABASE_PASSWORD=password
+          - NODE_ENV=production

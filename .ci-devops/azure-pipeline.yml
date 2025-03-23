@@ -1,0 +1,111 @@
+trigger:
+  - dev # Ajusta la rama según tu flujo de trabajo
+
+pool:
+  vmImage: 'ubuntu-latest' # O puedes usar la imagen que prefieras
+
+variables:
+  pythonVersion: '3.11.3' # Ajusta la versión de Python que estés usando
+  IMAGE_NAME: 'myapp-$(Build.BuildId)' # Usa el ID de build para la imagen Docker
+  IMAGE_TAG: 'latest'
+  FULL_IMAGE_NAME: '$(DOCKER_USERNAME)/$(IMAGE_NAME):$(IMAGE_TAG)'
+
+stages:
+- stage: PrepareEnvironment
+  displayName: 'Preparar el Entorno'
+  jobs:
+  - job: Prepare
+    displayName: 'Preparar entorno de trabajo'
+    steps:
+    - script: echo "Preparando el entorno..."
+      displayName: 'Preparar entorno'
+
+- stage: InstallDependencies
+  displayName: 'Instalar Dependencias'
+  jobs:
+  - job: Install
+    displayName: 'Instalar Dependencias'
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '$(pythonVersion)'  # Usa la versión de Python
+        addToPath: true
+
+    - script: |
+        echo "Instalando dependencias de Python..."
+        pip install -r requirements.txt
+      displayName: 'Instalar dependencias'
+
+- stage: CodeAnalysis
+  displayName: 'Análisis de Código con Pylint'
+  jobs:
+  - job: PylintAnalysis
+    displayName: 'Análisis estático con Pylint'
+    steps:
+    - script: pip install pylint
+      displayName: 'Instalar Pylint'
+
+    - script: |
+        echo "Ejecutando análisis de código con Pylint..."
+        export PYTHONPATH=$(pwd)
+        pylint api demo --output-format=colorized --score=n || true  # Análisis con color
+      displayName: 'Ejecutar análisis Pylint'
+      continueOnError: true
+
+- stage: UnitTests
+  displayName: 'Ejecutar Pruebas Unitarias'
+  jobs:
+  - job: RunTests
+    displayName: 'Ejecutar pruebas unitarias'
+    steps:
+    - script: pip install -r requirements.txt
+      displayName: 'Instalar dependencias para pruebas'
+
+    - script: |
+        echo "Configurando DJANGO_SETTINGS_MODULE..."
+        export DJANGO_SETTINGS_MODULE=demo.settings
+        echo "Ejecutando pruebas..."
+        python manage.py test  # Ejecución de pruebas unitarias
+      displayName: 'Ejecutar pruebas'
+
+- stage: TestCoverage
+  displayName: 'Cobertura de Pruebas'
+  jobs:
+  - job: Coverage
+    displayName: 'Cobertura de pruebas'
+    steps:
+    - script: |
+        echo "Ejecutando cobertura de pruebas..."
+        pip install coverage
+        coverage run manage.py test  # Ejecución de cobertura
+        coverage report  # Informe de cobertura
+      displayName: 'Ejecutar cobertura de pruebas'
+
+- stage: BuildAndPublishDockerImage
+  displayName: 'Construir y Subir Imagen Docker'
+  jobs:
+  - job: BuildAndPublish
+    displayName: 'Construir y Subir Imagen Docker'
+    steps:
+    - script: |
+        echo "Construyendo la imagen Docker con el nombre $(FULL_IMAGE_NAME)..."
+        docker build -t $(FULL_IMAGE_NAME) .  # Construcción de Docker
+        echo "Subiendo la imagen Docker a Docker Hub..."
+        echo $(DOCKER_PASSWORD) | docker login -u $(DOCKER_USERNAME) --password-stdin
+        echo "Pushing image $(FULL_IMAGE_NAME)..."  # Subida de imagen
+        docker push $(FULL_IMAGE_NAME)
+        echo "La imagen Docker se construyó y subió correctamente con el nombre $(FULL_IMAGE_NAME)"
+      displayName: 'Construir y Subir Imagen Docker'
+
+- stage: PublishArtifacts
+  displayName: 'Publicar Artefactos'
+  jobs:
+  - job: Publish
+    displayName: 'Publicar artefactos del build'
+    steps:
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publicar artefactos'
+      condition: succeededOrFailed()
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'  # Publicación de artefactos
+        artifactName: drop

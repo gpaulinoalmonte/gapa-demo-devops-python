@@ -1,0 +1,9 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: devsu-demo-sa
+  namespace: devsu-demo
+secrets:
+  - name: devsu-demo-sa-dockercfg-2ppwz
+imagePullSecrets:
+  - name: docker-registry

@@ -1,0 +1,43 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: devsu-demo-cr
+rules:
+  - apiGroups:
+      - security.openshift.io
+    resourceNames:
+      - privileged
+      - hostmount-anyuid
+    resources:
+      - securitycontextconstraints
+    verbs:
+      - use
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: devsu-demo-cr
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: devsu-demo-cr
+subjects:
+  - kind: ServiceAccount
+    name: devsu-demo-sa
+    namespace: devsu-demo
+
+---
+# Política de permiso root en el contenedor para devsu-demo
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: anyuid-cluster-role-binding-devsu-demo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:openshift:scc:anyuid
+subjects:
+  - kind: ServiceAccount
+    name: devsu-demo-sa
+    namespace: devsu-demo

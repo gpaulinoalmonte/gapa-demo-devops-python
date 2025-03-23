@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devsu-demo-devops-python
+  namespace: devsu-demo
+spec:
+  selector:
+    matchLabels:
+      app: devsu-demo-devops-python
+  template:
+    metadata:
+      labels:
+        app: devsu-demo-devops-python
+    spec:
+      containers:
+        - name: devsu-demo-devops-python
+          image: gpaulinoalmonte/myapp-101
+          imagePullPolicy: Always
+          envForm:
+            - secretRef:
+                name: secret-devsu-demo-devops-python
+          resources: {}
+          ports:
+            - containerPort: 8000
+      serviceAccountName: devsu-demo-sa
+      serviceAccount: devsu-demo-sa
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devsu-demo-devops-python
+  namespace: devsu-demo
+spec:
+  selector:
+    app: devsu-demo-devops-python
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
