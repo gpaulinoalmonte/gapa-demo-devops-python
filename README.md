@@ -3748,7 +3748,7 @@ secretGenerator:
     resources :
     # . Apps
     base
-    .-. . ./ . ./ . ./apps/apap-prod/overlays/test
+    .-. . ./ . ./ . ./apps/devsu-demo/overlays/test
     first commit, George Albert Paulino Almonte (10 \|
     ML app.yaml
     M kustomization.yaml

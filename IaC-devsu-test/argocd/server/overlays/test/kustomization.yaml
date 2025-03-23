@@ -3,4 +3,4 @@ kind: Kustomization
 
 resources:
   # Apps
-  - ../../../apps/apap-prod/overlays/test
+  - ../../../apps/devsu-demo/overlays/test
